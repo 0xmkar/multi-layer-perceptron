@@ -2,6 +2,9 @@
 # vars - data, grad, label, operation, backward func, prev
 # Ops - mult, div, add, activation_func
 
+import math
+
+
 class Value:
 
     def __init__(self, data: float, label: str = "") -> None:
@@ -45,6 +48,18 @@ class Value:
 
     def __rmul__(self, other):
         return self * other
+
+    def tanh(self):
+        out = Value(math.tanh(self.data))
+        out.prev = (self,)
+        out.label = "tanh"
+        out.op = "tanh"
+
+        def _backwards():
+            self.grad += (1 - out.data**2) * out.grad
+
+        out._backwards = _backwards
+        return out
 
     def backwards(self):
         topo: list[Value] = []
