@@ -32,6 +32,40 @@ class Value:
     def __radd__(self, other):
         return self + other
 
+    def __sub__(self, other):
+        if isinstance(other, (int, float)):
+            other = Value(other)
+        out = Value(self.data - other.data)
+        out.prev = (self, other)
+        out.label = "-"
+        out.op = "-"
+
+        def _backwards():
+            self.grad += out.grad
+            other.grad -= out.grad
+
+        out._backwards = _backwards
+        return out
+
+    def __rsub__(self, other):
+        if isinstance(other, (int, float)):
+            other = Value(other)
+        return other - self
+
+    def __pow__(self, other):
+        if not isinstance(other, (int, float)):
+            raise TypeError("only numeric exponents are supported")
+        out = Value(self.data ** other)
+        out.prev = (self,)
+        out.label = f"**{other}"
+        out.op = "**"
+
+        def _backwards():
+            self.grad += (other * (self.data ** (other - 1))) * out.grad
+
+        out._backwards = _backwards
+        return out
+
     def __mul__(self, other):
         if isinstance(other, (int, float)) : other = Value(other)
         out = Value(self.data * other.data)
