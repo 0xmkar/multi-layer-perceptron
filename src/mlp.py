@@ -29,13 +29,14 @@ class Neuron:
         return self.w + [self.b]
 
 class Layer:
-    def __init__(self, n_in: int, n_out: int) -> None:
+    def __init__(self, n_in: int, n_out: int, use_activation: bool = True) -> None:
         self.n_in = n_in
         self.n_out = n_out
         self.neurons = [Neuron(n_in) for _ in range(n_out)]
+        self.use_activation = use_activation
     
     def __call__(self, x: list[Value]) -> list[Value]:
-        return [neuron(x) for neuron in self.neurons]
+        return [neuron(x) if self.use_activation else neuron.call_without_activation(x) for neuron in self.neurons]
     
     def parameters(self) -> list[Value]:
         return [param for neuron in self.neurons for param in neuron.parameters()]
@@ -46,7 +47,7 @@ class Layer:
 class multi_layer_perceptron:
     def __init__(self, n_in: int, n_hidden: list[int], n_out: int) -> None:
         sz = [n_in] + n_hidden + [n_out]
-        self.layers = [Layer(sz[i], sz[i+1]) for i in range(len(sz)-1)]
+        self.layers = [Layer(sz[i], sz[i+1], use_activation=i < len(sz)-2) for i in range(len(sz)-1)]
 
     def __call__(self, x: list[Value]) -> list[Value]:
         for layer in self.layers:
