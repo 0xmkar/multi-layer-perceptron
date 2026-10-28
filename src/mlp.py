@@ -16,6 +16,12 @@ class Neuron:
             z = z + wi * xi
         return self.activation_function(z)
     
+    def call_without_activation(self, x: list[Value]) -> Value:
+        z = self.b
+        for wi, xi in zip(self.w, x):
+            z = z + wi * xi
+        return z
+    
     def __repr__(self) -> str:
         return f"Neuron(weights={self.w}, bias={self.b})"
     
